@@ -1,0 +1,45 @@
+Y∆V
+===
+yav is a Golang "live" static blog. Content is kept in memory for fast delivery
+and checked against disk to grab updates to the site.
+
+Template functionality is provided by Go's html/template and sprig. Check out
+the documentation of both packages:
+  * https://golang.org/pkg/text/template/
+  * http://masterminds.github.io/sprig/
+
+By default it will try to use HTTPS so a certificate and key should be supplied.
+Plain HTTP is also available by disabling HTTPS via "-use-https=false".
+
+Use "-help" for all the program flags.
+
+Build
+=====
+
+$ cd src/ && go build -o ../yav
+
+File tree
+=========
+There are 2 directories that are really important for this program to work:
+  * site/: all markdown files and extra files to be served.
+  * template/: template files used to render the pages.
+
+Without them yav will fail miserably. Example files exist on those directories
+to see it working.
+
+Front Matter
+============
+Taken from Jekyll. This way functionality can be extended and variables can be
+passed to the template directly from the markdown files.
+
+yav front matter variables:
+  * `template` (string): *required* dictates which template to use.
+  * `render` (bool): display the markdown content rendered to HTML or plain.
+
+Requirements
+============
+  * https://github.com/Masterminds/sprig
+
+Issues
+======
+A lot. Please open a ticket.

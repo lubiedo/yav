@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>{{ .title | upper }}</title>
+  </head>
+  <body>
+    <small> date posted: {{ .date }}</small>
+    {{ .content }}
+  </body>
+  {{ template "footer.html" }}
+</html>
