@@ -64,7 +64,7 @@ func TplFuncDirListing(p string) (files []string) {
 				return err
 			}
 			if path != fullpath {
-				files = append(files, strings.Replace(path, "site/", "", 1))
+				files = append(files, strings.Replace(path, sitedir, "", 1))
 				if info.IsDir() {
 					return filepath.SkipDir
 				}
