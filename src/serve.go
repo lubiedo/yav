@@ -3,6 +3,8 @@ package main
 import (
 	"crypto/tls"
 	"html/template"
+	"io"
+	"net"
 	"net/http"
 	"time"
 
@@ -122,6 +124,7 @@ func Serve() {
 			config.Log.Fatal("%s", err)
 		}
 	} else {
+		server.ConnState = CheckHTTPSConnState
 		server.TLSConfig = &tls.Config{
 			MinVersion:               tls.VersionTLS12,
 			PreferServerCipherSuites: true,
@@ -152,4 +155,39 @@ func ReturnSiteFile(path string) (models.SiteFile, bool) {
 		}
 	}
 	return models.SiteFile{}, false
+}
+
+/*
+this function exists to forcefully redirect users from HTTP to HTTPS
+*/
+func CheckHTTPSConnState(c net.Conn, s http.ConnState) {
+	if s != http.StateNew {
+		return
+	}
+	tlsConn, _ := c.(*tls.Conn)
+	hs := tlsConn.Handshake()
+
+	if hs == nil || hs == io.EOF {
+		return
+	}
+	rh := hs.(tls.RecordHeaderError)
+
+	if tlsConn.ConnectionState().CipherSuite == 0 && tlsRecordHeaderLooksLikeHTTP(rh.RecordHeader) {
+		if config.Verbose {
+			config.Log.Info("User \"%s\" redirected from HTTP to HTTPS", c.RemoteAddr())
+		}
+		_, _ = rh.Conn.Write([]byte("HTTP/1.0 301 Moved Permanently\r\n" +
+			"Location: https://" + config.Addr + ":" + config.Port + "\r\n\r\n" +
+			"Redirecting you to HTTPS\n"))
+		rh.Conn.Close()
+		return
+	}
+}
+
+func tlsRecordHeaderLooksLikeHTTP(hdr [5]byte) bool {
+	switch string(hdr[:]) {
+	case "GET /", "HEAD ", "POST ", "PUT /", "OPTIO":
+		return true
+	}
+	return false
 }
