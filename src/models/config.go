@@ -13,4 +13,5 @@ type Config struct {
 
 	LogFile string
 	Log     *utils.Log
+	TplVars string
 }
