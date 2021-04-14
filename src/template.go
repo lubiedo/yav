@@ -2,6 +2,8 @@ package main
 
 import (
 	"html/template"
+	"io/fs"
+	"path/filepath"
 	"strings"
 
 	"github.com/Masterminds/sprig"
@@ -14,23 +16,64 @@ const (
 	templateext = ".html" /* load files with this extension only */
 )
 
+/* extra template functions */
+var extrafmap = map[string]interface{}{
+	"dirls":    TplFuncDirListing,
+	"toTplExt": TplFuncToTplExt,
+}
+
 func InitTemplate() (tpls *template.Template) {
 	if !utils.FileExist(templdir) {
 		config.Log.Fatal("Directory \"%s\" does not exist", templdir)
 	}
 
-	tpls = template.Must(template.New("templates").Funcs(sprig.FuncMap()).ParseGlob(templdir + "/*" + templateext))
+	/* add extra functions */
+	fmap := sprig.FuncMap()
+	for k, v := range extrafmap {
+		fmap[k] = v
+	}
+
+	tpls = template.Must(template.New("templates").Funcs(fmap).ParseGlob(templdir + "/*" + templateext))
 	if config.Verbose {
 		config.Log.Info("Templates loaded%s", tpls.DefinedTemplates())
 	}
 	return
 }
 
-func RevertTemplateExt(s string) string {
-	pos := strings.LastIndex(s, "/")
-	if pos == -1 || len(s[pos:]) == 1 {
+func ToTemplateExt(s string) string {
+	dir, name := filepath.Split(s)
+	return filepath.Join(dir, strings.Replace(name, markdownext, templateext, -1))
+}
+
+func FromTemplateExt(s string) string {
+	dir, name := filepath.Split(s)
+	if name == "" {
 		return ""
 	}
 
-	return strings.Replace(s, templateext, markdownext, -1)
+	return filepath.Join(dir, strings.Replace(name, templateext, markdownext, -1))
 }
+
+func errorTplFunc(name string) { config.Log.Error("Error executing template function \"s\"", name) }
+func TplFuncDirListing(p string) (files []string) {
+	fullpath := sitedir + "/" + p
+
+	err := filepath.Walk(fullpath,
+		func(path string, info fs.FileInfo, err error) error {
+			if err != nil {
+				return err
+			}
+			if path != fullpath {
+				files = append(files, strings.Replace(path, "site/", "", 1))
+				if info.IsDir() {
+					return filepath.SkipDir
+				}
+			}
+			return nil
+		})
+	if err != nil {
+		errorTplFunc("dirls")
+	}
+	return
+}
+func TplFuncToTplExt(p string) string { return ToTemplateExt(p) }

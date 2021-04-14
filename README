@@ -37,6 +37,13 @@ yav front matter variables:
   * `template` (string): *required* dictates which template to use.
   * `render` (bool): display the markdown content rendered to HTML or plain.
 
+Template functions
+==================
+Some extra functions were added to yav besides the mentioned previously.
+  * `dirls (string)`: directory listing. Returns: array of strings.
+  * `toTplExt (string)`: converts from markdown to template extensions. Returns:
+  string.
+
 Requirements
 ============
   * https://github.com/Masterminds/sprig

@@ -45,10 +45,10 @@ func Render(w http.ResponseWriter, req *http.Request) {
 				http.ServeFile(w, req, urlpath)
 				return
 			}
-		} else if utils.FileExist(urlpath) || utils.FileExist(RevertTemplateExt(urlpath)) {
+		} else if utils.FileExist(urlpath) || utils.FileExist(FromTemplateExt(urlpath)) {
 			/* revert to markdown ext to use real path if necessary */
 			if urlpath[len(urlpath)-len(templateext):] == templateext {
-				urlpath = RevertTemplateExt(urlpath)
+				urlpath = FromTemplateExt(urlpath)
 			}
 
 			newfile, err = ProcessSiteFile(urlpath)
@@ -184,6 +184,7 @@ func CheckHTTPSConnState(c net.Conn, s http.ConnState) {
 	}
 }
 
+// taken from go/src/net/http/server.go
 func tlsRecordHeaderLooksLikeHTTP(hdr [5]byte) bool {
 	switch string(hdr[:]) {
 	case "GET /", "HEAD ", "POST ", "PUT /", "OPTIO":
