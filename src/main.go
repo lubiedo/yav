@@ -7,6 +7,7 @@ import (
 
 	"github.com/lubiedo/yav/src/models"
 	"github.com/lubiedo/yav/src/utils"
+	"gopkg.in/yaml.v2"
 )
 
 /* defaults */
@@ -21,9 +22,10 @@ const (
 )
 
 var (
-	config models.Config
-	files  []models.SiteFile
-	tpls   *template.Template
+	config  models.Config
+	files   []models.SiteFile
+	tpls    *template.Template
+	tplvars map[string]interface{}
 )
 
 func init() {
@@ -38,6 +40,7 @@ func init() {
 	flag.StringVar(&config.KeyPath, "key", "", "Key file path.")
 
 	flag.StringVar(&config.LogFile, "log", "", "Output to log file.")
+	flag.StringVar(&config.TplVars, "tpl-vars", "", "Load template variables.")
 
 	flag.Parse()
 }
@@ -61,6 +64,20 @@ func main() {
 	if config.UseHTTPS {
 		if !utils.FileExist(config.CertPath) || !utils.FileExist(config.KeyPath) {
 			config.Log.Fatal("Can't load certificate or key files")
+		}
+	}
+
+	if config.TplVars != "" {
+		data, err := os.ReadFile(config.TplVars)
+		if err != nil {
+			config.Log.Fatal("Error loading template variables from \"%s\"",
+				config.TplVars)
+		}
+
+		err = yaml.Unmarshal(data, &tplvars)
+		if err != nil {
+			config.Log.Fatal("Parsing template variables from \"%s\" failed",
+				config.TplVars)
 		}
 	}
 

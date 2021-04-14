@@ -17,3 +17,6 @@ yav
 .AppleDouble
 .LSOverride
 .atom-build.yml
+site/
+template/
+vars.yml

@@ -75,6 +75,7 @@ func Render(w http.ResponseWriter, req *http.Request) {
 		}
 	}
 
+	w.Header().Set("X-Frame-Options", "SAMEORIGIN")
 	w.Header().Add("Content-Type", file.MimeType)
 
 	filepath := GetSiteFilePath(file)
@@ -102,7 +103,12 @@ func Render(w http.ResponseWriter, req *http.Request) {
 	tplvariables := make(map[string]interface{})
 	tplvariables["content"] = template.HTML(string(file.Rendered))
 	for k, v := range file.Attrs.ExtraFields {
-		tplvariables[k] = v.(string)
+		tplvariables[k] = v
+	}
+	if len(tplvars) > 0 {
+		for k, v := range tplvars {
+			tplvariables[k] = v
+		}
 	}
 
 	tpls.ExecuteTemplate(w, file.Attrs.Template, tplvariables)
