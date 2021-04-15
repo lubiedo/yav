@@ -102,7 +102,7 @@ func ProcessSiteFile(path string) (page models.SiteFile, err error) {
 			err = fmt.Errorf("Template missing for %s/%s", page.FileDir, page.FileName)
 		}
 
-		mdextensions := parser.CommonExtensions | parser.Includes
+		mdextensions := parser.CommonExtensions | parser.Includes | parser.LaxHTMLBlocks
 		mdparser := parser.NewWithExtensions(mdextensions)
 		/* size(attrs + (delim*2) + (nl*2) */
 		if page.Attrs.Render {

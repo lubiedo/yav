@@ -19,4 +19,4 @@ yav
 .atom-build.yml
 site/
 template/
-vars.yml
+private/

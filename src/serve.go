@@ -104,13 +104,14 @@ func Render(w http.ResponseWriter, req *http.Request) {
 	tplvariables["url"] = req.URL
 	tplvariables["template"] = file.Attrs.Template
 	tplvariables["content"] = template.HTML(string(file.Rendered))
-	for k, v := range file.Attrs.ExtraFields {
-		tplvariables[k] = v
-	}
 	if len(tplvars) > 0 {
 		for k, v := range tplvars {
 			tplvariables[k] = v
 		}
+	}
+	for k, v := range file.Attrs.ExtraFields {
+		/* extra fields will override previously defined variables */
+		tplvariables[k] = v
 	}
 
 	tpls.ExecuteTemplate(w, file.Attrs.Template, tplvariables)

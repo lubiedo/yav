@@ -3,11 +3,13 @@ package main
 import (
 	"html/template"
 	"io/fs"
+	"os"
 	"path/filepath"
 	"strings"
 
-	"github.com/Masterminds/sprig"
+	"github.com/Masterminds/sprig/v3"
 	"github.com/lubiedo/yav/src/utils"
+	"gopkg.in/yaml.v2"
 )
 
 /* default definitions */
@@ -18,8 +20,10 @@ const (
 
 /* extra template functions */
 var extrafmap = map[string]interface{}{
-	"dirls":    TplFuncDirListing,
+	"readFile": TplFuncReadFile,
+	"dirLs":    TplFuncDirLs,
 	"toTplExt": TplFuncToTplExt,
+	"getFM":    TplFuncGetFM,
 }
 
 func InitTemplate() (tpls *template.Template) {
@@ -55,7 +59,18 @@ func FromTemplateExt(s string) string {
 }
 
 func errorTplFunc(name string) { config.Log.Error("Error executing template function \"s\"", name) }
-func TplFuncDirListing(p string) (files []string) {
+func TplFuncReadFile(p string) (data []byte) {
+	fullpath := filepath.Join(sitedir, p)
+	if !utils.FileExist(fullpath) {
+		return
+	}
+	data, err := os.ReadFile(fullpath)
+	if err != nil {
+		errorTplFunc("readFile")
+	}
+	return
+}
+func TplFuncDirLs(p string) (files []string) {
 	fullpath := sitedir + "/" + p
 
 	err := filepath.Walk(fullpath,
@@ -72,8 +87,20 @@ func TplFuncDirListing(p string) (files []string) {
 			return nil
 		})
 	if err != nil {
-		errorTplFunc("dirls")
+		errorTplFunc("dirLs")
 	}
 	return
 }
 func TplFuncToTplExt(p string) string { return ToTemplateExt(p) }
+func TplFuncGetFM(p string) (fm map[string]interface{}) {
+	data := TplFuncReadFile(p)
+	if len(data) == 0 {
+		return
+	}
+
+	fmdata := GetFrontMatter(data)
+	if err := yaml.Unmarshal(fmdata, &fm); err != nil {
+		errorTplFunc("getFM")
+	}
+	return
+}

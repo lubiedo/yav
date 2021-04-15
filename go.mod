@@ -7,9 +7,7 @@ replace github.com/lubiedo/yav/src/models => ./src/models
 replace github.com/lubiedo/yav/src/utils => ./src/utils
 
 require (
-	github.com/Masterminds/goutils v1.1.1 // indirect
-	github.com/Masterminds/semver v1.5.0 // indirect
-	github.com/Masterminds/sprig v2.22.0+incompatible
+	github.com/Masterminds/sprig/v3 v3.2.2
 	github.com/gomarkdown/markdown v0.0.0-20210408062403-ad838ccf8cdd
 	github.com/google/uuid v1.2.0 // indirect
 	github.com/huandu/xstrings v1.3.2 // indirect

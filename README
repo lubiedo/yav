@@ -37,12 +37,18 @@ yav front matter variables:
   * `template` (string): *required* dictates which template to use.
   * `render` (bool): display the markdown content rendered to HTML or plain.
 
+It is possible to add more variables to be used by templates via `-tpl-vars` and
+a yaml file.
+
 Template functions
 ==================
 Some extra functions were added to yav besides the mentioned previously.
-  * `dirls (string)`: directory listing. Returns: array of strings.
+  * `readFile (string)`: read file in path. Returns: []byte.
+  * `dirLs (string)`: directory listing. Returns: string.
   * `toTplExt (string)`: converts from markdown to template extensions. Returns:
   string.
+  * `getFM (string)`: get front matter variables from template. Returns:
+  map[string]interface{}.
 
 Requirements
 ============
