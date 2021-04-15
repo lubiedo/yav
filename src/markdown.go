@@ -8,6 +8,7 @@ import (
 
 	"github.com/gomarkdown/markdown"
 	"github.com/gomarkdown/markdown/html"
+	"github.com/gomarkdown/markdown/parser"
 	"github.com/lubiedo/yav/src/models"
 	"github.com/lubiedo/yav/src/utils"
 	"gopkg.in/yaml.v2"
@@ -101,9 +102,11 @@ func ProcessSiteFile(path string) (page models.SiteFile, err error) {
 			err = fmt.Errorf("Template missing for %s/%s", page.FileDir, page.FileName)
 		}
 
+		mdextensions := parser.CommonExtensions | parser.Includes
+		mdparser := parser.NewWithExtensions(mdextensions)
 		/* size(attrs + (delim*2) + (nl*2) */
 		if page.Attrs.Render {
-			page.Rendered = markdown.ToHTML(page.Data[len(fm)+8:], nil, renderer)
+			page.Rendered = markdown.ToHTML(page.Data[len(fm)+8:], mdparser, renderer)
 		} else {
 			page.Rendered = page.Data[len(fm)+8:]
 		}

@@ -101,6 +101,8 @@ func Render(w http.ResponseWriter, req *http.Request) {
 	}
 
 	tplvariables := make(map[string]interface{})
+	tplvariables["url"] = req.URL
+	tplvariables["template"] = file.Attrs.Template
 	tplvariables["content"] = template.HTML(string(file.Rendered))
 	for k, v := range file.Attrs.ExtraFields {
 		tplvariables[k] = v
