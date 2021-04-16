@@ -39,7 +39,7 @@ func init() {
 		"Secure connection via HTTPS.")
 	flag.StringVar(&config.CertPath, "cert", "", "Certificate file path.")
 	flag.StringVar(&config.KeyPath, "key", "", "Key file path.")
-	flag.Var(&headers, "header", "Add HTTP headers (accumulative).")
+	flag.Var(&headers, "header", "Add HTTP header.")
 
 	flag.StringVar(&config.LogFile, "log", "", "Output to log file.")
 	flag.StringVar(&config.TplVars, "tpl-vars", "", "Load template variables.")

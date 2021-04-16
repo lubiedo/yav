@@ -28,6 +28,12 @@ There are 2 directories that are really important for this program to work:
 Without them yav will fail miserably. Example files exist on those directories
 to see it working.
 
+HTTP
+=====
+Headers can be added via the argument `-header`. Multiple can be added by
+passing more than one:
+  -header 'server: yav' -header 'x-download-options: noopen'
+
 Front Matter
 ============
 Taken from Jekyll. This way functionality can be extended and variables can be
