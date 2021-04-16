@@ -51,7 +51,9 @@ Template functions
 Some extra functions were added to yav besides the mentioned previously.
   * `readFile (string)`: read file in path. Returns: []byte.
   * `dirLs (string)`: directory listing. Returns: string.
-  * `toTplExt (string)`: converts from markdown to template extensions. Returns:
+  * `fromTplExt (string)`: converts from template to markdown extension.
+  Returns: string.
+  * `toTplExt (string)`: converts from markdown to template extension. Returns:
   string.
   * `getFM (string)`: get front matter variables from template. Returns:
   map[string]interface{}.
