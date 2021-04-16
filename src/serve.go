@@ -125,14 +125,20 @@ func Serve() {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", Render)
 
+	fulladdr := config.Addr + ":" + config.Port
+	listener, err := net.Listen("tcp", fulladdr)
+	if err != nil {
+		config.Log.Fatal("%s", err)
+	}
+
 	server := &http.Server{
-		Addr:         config.Addr + ":" + config.Port,
+		Addr:         fulladdr,
 		Handler:      mux,
 		WriteTimeout: 10 * time.Second,
 		IdleTimeout:  20 * time.Second,
 	}
 	if !config.UseHTTPS {
-		err := server.ListenAndServe()
+		err := server.Serve(listener)
 		if err != nil {
 			config.Log.Fatal("%s", err)
 		}
@@ -142,7 +148,7 @@ func Serve() {
 			MinVersion:               tls.VersionTLS12,
 			PreferServerCipherSuites: true,
 		}
-		err := server.ListenAndServeTLS(config.CertPath, config.KeyPath)
+		err := server.ServeTLS(listener, config.CertPath, config.KeyPath)
 		if err != nil {
 			config.Log.Fatal("%s", err)
 		}

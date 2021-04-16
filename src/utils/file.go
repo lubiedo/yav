@@ -43,6 +43,9 @@ func FileChecksum(p string) [32]byte {
 }
 
 func FileIsDir(p string) bool {
-	info, _ := os.Stat(p)
+	info, err := os.Stat(p)
+	if err != nil {
+		return false
+	}
 	return info.IsDir()
 }
