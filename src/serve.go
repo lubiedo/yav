@@ -39,8 +39,7 @@ func Render(w http.ResponseWriter, req *http.Request) {
 					newlocation += "/"
 				}
 				newlocation += "index" + templateext
-				Location(newlocation, w, req)
-				return
+				file, _ = ReturnSiteFile(newlocation)
 			} else {
 				http.ServeFile(w, req, urlpath)
 				return
@@ -154,10 +153,6 @@ func Location(url string, w http.ResponseWriter, r *http.Request) {
 }
 
 func ReturnSiteFile(path string) (models.SiteFile, bool) {
-	if path == "/" { /* redirect to index */
-		path += "index" + templateext
-	}
-
 	for _, f := range files {
 		if path == f.URLPath {
 			return f, true
@@ -179,7 +174,10 @@ func CheckHTTPSConnState(c net.Conn, s http.ConnState) {
 	if hs == nil || hs == io.EOF {
 		return
 	}
-	rh := hs.(tls.RecordHeaderError)
+	rh, ok := hs.(tls.RecordHeaderError)
+	if !ok {
+		return
+	}
 
 	if tlsConn.ConnectionState().CipherSuite == 0 && tlsRecordHeaderLooksLikeHTTP(rh.RecordHeader) {
 		if config.Verbose {

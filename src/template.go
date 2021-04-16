@@ -20,10 +20,11 @@ const (
 
 /* extra template functions */
 var extrafmap = map[string]interface{}{
-	"readFile": TplFuncReadFile,
-	"dirLs":    TplFuncDirLs,
-	"toTplExt": TplFuncToTplExt,
-	"getFM":    TplFuncGetFM,
+	"readFile":   TplFuncReadFile,
+	"dirLs":      TplFuncDirLs,
+	"toTplExt":   TplFuncToTplExt,
+	"fromTplExt": TplFuncFromTplExt,
+	"getFM":      TplFuncGetFM,
 }
 
 func InitTemplate() (tpls *template.Template) {
@@ -91,7 +92,8 @@ func TplFuncDirLs(p string) (files []string) {
 	}
 	return
 }
-func TplFuncToTplExt(p string) string { return ToTemplateExt(p) }
+func TplFuncToTplExt(p string) string   { return ToTemplateExt(p) }
+func TplFuncFromTplExt(p string) string { return FromTemplateExt(p) }
 func TplFuncGetFM(p string) (fm map[string]interface{}) {
 	data := TplFuncReadFile(p)
 	if len(data) == 0 {
