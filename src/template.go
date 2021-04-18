@@ -62,7 +62,7 @@ func FromTemplateExt(s string) string {
 func errorTplFunc(name string) { config.Log.Error("Error executing template function \"%s\"", name) }
 func TplFuncReadFile(p string) (data []byte) {
 	fullpath := filepath.Join(sitedir, p)
-	if !utils.FileExist(fullpath) || utils.FileIsDir(fullpath) {
+	if !utils.FileExist(fullpath) || utils.FileIsDir(fullpath) {
 		return
 	}
 	data, err := os.ReadFile(fullpath)
