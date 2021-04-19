@@ -12,6 +12,9 @@ import (
 	"github.com/lubiedo/yav/src/utils"
 )
 
+// Main rendering process
+// This is the only handler for HTTP(S) requests. Will get all client requests
+// and render the content using templates. It will also serve files as well.
 func Render(w http.ResponseWriter, req *http.Request) {
 	var (
 		newfile models.SiteFile
@@ -60,7 +63,7 @@ func Render(w http.ResponseWriter, req *http.Request) {
 
 			file = newfile
 		} else {
-			http.NotFound(w, req)
+			NotFound(w, req)
 			return
 		}
 	} else {
@@ -69,7 +72,7 @@ func Render(w http.ResponseWriter, req *http.Request) {
 
 		if !utils.FileExist(path) {
 			RemoveSiteFile(file)
-			http.NotFound(w, req)
+			NotFound(w, req)
 			return
 		}
 	}
@@ -104,23 +107,11 @@ func Render(w http.ResponseWriter, req *http.Request) {
 		file = newfile
 	}
 
-	tplvariables := make(map[string]interface{})
-	tplvariables["url"] = req.URL
-	tplvariables["template"] = file.Attrs.Template
-	tplvariables["content"] = template.HTML(string(file.Rendered))
-	if len(tplvars) > 0 {
-		for k, v := range tplvars {
-			tplvariables[k] = v
-		}
-	}
-	for k, v := range file.Attrs.ExtraFields {
-		/* extra fields will override previously defined variables */
-		tplvariables[k] = v
-	}
-
+	tplvariables := GenerateTemplateVars(req, file)
 	tpls.ExecuteTemplate(w, file.Attrs.Template, tplvariables)
 }
 
+// Listen and serve via HTTP(S)
 func Serve() {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", Render)
@@ -155,14 +146,7 @@ func Serve() {
 	}
 }
 
-func ServerError(w http.ResponseWriter, r *http.Request) {
-	http.Error(w, "500 server error", http.StatusInternalServerError)
-}
-func Location(url string, w http.ResponseWriter, r *http.Request) {
-	w.Header().Add("Location", url)
-	http.Error(w, "301 moved permanently", http.StatusMovedPermanently)
-}
-
+// Finds the SiteFile struct depending on file URL path
 func ReturnSiteFile(path string) (models.SiteFile, bool) {
 	for _, f := range files {
 		if path == f.URLPath {
@@ -170,6 +154,59 @@ func ReturnSiteFile(path string) (models.SiteFile, bool) {
 		}
 	}
 	return models.SiteFile{}, false
+}
+
+// 404 not found HTTP response
+func NotFound(w http.ResponseWriter, r *http.Request) {
+	if config.TplErroPage == "" {
+		http.NotFound(w, r)
+		return
+	}
+	ServeErrorTemplate(w, r, http.StatusNotFound, "404 not found")
+}
+
+// 500 server error HTTP response
+func ServerError(w http.ResponseWriter, r *http.Request) {
+	if config.TplErroPage == "" {
+		http.Error(w, "500 server error", http.StatusInternalServerError)
+		return
+	}
+	ServeErrorTemplate(w, r, http.StatusInternalServerError, "500 server error")
+}
+
+// Send `Location` header to redirect user
+func Location(url string, w http.ResponseWriter, r *http.Request) {
+	w.Header().Add("Location", url)
+	http.Error(w, "301 moved permanently", http.StatusMovedPermanently)
+}
+
+// Serve the client the error in template
+func ServeErrorTemplate(w http.ResponseWriter, r *http.Request, code int, msg string) {
+	vars := GenerateTemplateVars(r, models.SiteFile{Rendered: []byte(msg)})
+
+	/* extra error vars */
+	vars["code"] = code
+
+	w.WriteHeader(code)
+	tpls.ExecuteTemplate(w, config.TplErroPage, vars)
+}
+
+// Returns variables to be passed to the templates
+func GenerateTemplateVars(r *http.Request, f models.SiteFile) (vars map[string]interface{}) {
+	vars = make(map[string]interface{})
+	vars["url"] = r.URL
+	vars["template"] = f.Attrs.Template
+	vars["content"] = template.HTML(string(f.Rendered))
+	if len(tplvars) > 0 {
+		for k, v := range tplvars {
+			vars[k] = v
+		}
+	}
+	for k, v := range f.Attrs.ExtraFields {
+		/* extra fields will override previously defined variables */
+		vars[k] = v
+	}
+	return
 }
 
 /*

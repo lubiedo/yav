@@ -34,6 +34,12 @@ Headers can be added via the argument `-header`. Multiple can be added by
 passing more than one:
   -header 'server: yav' -header 'x-download-options: noopen'
 
+On HTTP errors: templates can also be used as a response to 404 and 500 server
+errors (these two so far) and can be specified using the `-tpl-error` flag.
+For example: if the template file `template/error.html` wants to be used then it
+should be passed as `-tpl-error error.html`. In this case the template variables
+`.content` will hold the error string and `.code` the Status code.
+
 Front Matter
 ============
 Taken from Jekyll. This way functionality can be extended and variables can be

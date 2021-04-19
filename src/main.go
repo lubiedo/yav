@@ -18,7 +18,7 @@ const (
 	addr      = "localhost"
 
 	name    = "Y∆V"
-	version = "0.0.1"
+	version = "0.1.0"
 )
 
 var (
@@ -42,6 +42,7 @@ func init() {
 	flag.Var(&headers, "header", "Add HTTP header.")
 
 	flag.StringVar(&config.LogFile, "log", "", "Output to log file.")
+	flag.StringVar(&config.TplErroPage, "tpl-error", "", "Use template as error page (filename).")
 	flag.StringVar(&config.TplVars, "tpl-vars", "", "Load template variables.")
 
 	flag.Parse()

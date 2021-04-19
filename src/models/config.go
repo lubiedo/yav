@@ -11,7 +11,8 @@ type Config struct {
 	CertPath string
 	KeyPath  string
 
-	LogFile string
-	Log     *utils.Log
-	TplVars string
+	LogFile     string
+	Log         *utils.Log
+	TplVars     string
+	TplErroPage string
 }

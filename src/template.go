@@ -42,6 +42,12 @@ func InitTemplate() (tpls *template.Template) {
 	if config.Verbose {
 		config.Log.Info("Templates loaded%s", tpls.DefinedTemplates())
 	}
+
+	if config.TplErroPage != "" {
+		if t := tpls.Lookup(config.TplErroPage); t == nil {
+			config.Log.Fatal("Template \"%s\" does not exist", config.TplErroPage)
+		}
+	}
 	return
 }
 
