@@ -4,6 +4,8 @@ import (
 	"flag"
 	"html/template"
 	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/lubiedo/yav/src/models"
 	"github.com/lubiedo/yav/src/utils"
@@ -93,5 +95,20 @@ func main() {
 		config.Log.Info("Loading templates")
 	}
 	tpls = InitTemplate()
+
+	/* define USR1 signal catch for template reload */
+	go func() {
+		sig := make(chan os.Signal, 1)
+		signal.Notify(sig, syscall.SIGUSR1)
+
+		for {
+			_ = <-sig
+			tpls = InitTemplate()
+			if config.Verbose {
+				config.Log.Info("Templates were reloaded.")
+			}
+		}
+	}()
+
 	Serve()
 }

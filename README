@@ -34,14 +34,19 @@ Headers can be added via the argument `-header`. Multiple can be added by
 passing more than one:
   -header 'server: yav' -header 'x-download-options: noopen'
 
-On HTTP errors: templates can also be used as a response to 404 and 500 server
+On HTTP errors:
+^^^^^^^^^^^^^^^
+Templates can also be used as a response to 404 and 500 server
 errors (these two so far) and can be specified using the `-tpl-error` flag.
 For example: if the template file `template/error.html` wants to be used then it
 should be passed as `-tpl-error error.html`. In this case the template variables
 `.content` will hold the error string and `.code` the Status code.
 
+Markdown
+========
+
 Front Matter
-============
+^^^^^^^^^^^^
 Taken from Jekyll. This way functionality can be extended and variables can be
 passed to the template directly from the markdown files.
 
@@ -52,8 +57,17 @@ yav front matter variables:
 It is possible to add more variables to be used by templates via `-tpl-vars` and
 a yaml file.
 
+Templates
+=========
+
+Reloading templates
+^^^^^^^^^^^^^^^^^^^
+In case that a template was modified while the service is running a full reload
+of the templates can be triggered by sending a SIGUSR1 signal to the process.
+Bare in mind that new template files will also be loaded in the process.
+
 Template functions
-==================
+^^^^^^^^^^^^^^^^^^
 Some extra functions were added to yav besides the mentioned previously.
   * `readFile (string)`: read file in path. Returns: []byte.
   * `dirLs (string)`: directory listing. Returns: string.
