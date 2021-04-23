@@ -54,11 +54,21 @@ yav front matter variables:
   * `template` (string): *required* dictates which template to use.
   * `render` (bool): display the markdown content rendered to HTML or plain.
 
-It is possible to add more variables to be used by templates via `-tpl-vars` and
-a yaml file.
+Template variables can be also passed from the markdown's front matter.
 
 Templates
 =========
+
+Variables
+^^^^^^^^^
+Fixed variables are:
+  * `url` (url.URL): requests URL data.
+  * `query` (url.Values): URL's query parameters (HTTP GET).
+  * `template` (string): template name.
+  * `content` (string): HTML rendered content from markdown.
+
+It is possible to add more variables to be used by templates via `-tpl-vars` and
+a yaml file.
 
 Reloading templates
 ^^^^^^^^^^^^^^^^^^^

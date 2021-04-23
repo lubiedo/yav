@@ -194,6 +194,7 @@ func ServeErrorTemplate(w http.ResponseWriter, r *http.Request, code int, msg st
 func GenerateTemplateVars(r *http.Request, f models.SiteFile) (vars map[string]interface{}) {
 	vars = make(map[string]interface{})
 	vars["url"] = r.URL
+	vars["query"] = r.URL.Query()
 	vars["template"] = f.Attrs.Template
 	vars["content"] = template.HTML(string(f.Rendered))
 	if len(tplvars) > 0 {
