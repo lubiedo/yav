@@ -79,7 +79,6 @@ func Render(w http.ResponseWriter, req *http.Request) {
 
 	/* default http headers... */
 	H := w.Header()
-	H.Set("X-Frame-Options", "SAMEORIGIN")
 	H.Set("Content-Type", file.MimeType)
 	if len(headers) > 0 { /* ... and extra headers */
 		headers.AddToHttp(&H)
