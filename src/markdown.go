@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"io/fs"
 	"os"
@@ -22,7 +23,7 @@ const (
 
 var renderer *html.Renderer
 
-func InitMarkdown() (p []models.SiteFile) {
+func InitMarkdown() (p models.Sites) {
 	if !utils.FileExist(sitedir) {
 		config.Log.Fatal("Directory \"%s\" does not exist", sitedir)
 	}
@@ -67,17 +68,13 @@ func ProcessSiteFile(path string) (page models.SiteFile, err error) {
 		},
 	}
 
-	if len(page.FileName) > len(markdownext) &&
-		page.FileName[len(page.FileName)-len(markdownext):] == markdownext {
+	if len(page.FileName) > len(markdownext) && isMarkdown(page.FileName) {
 		if page.Data, err = os.ReadFile(path); err != nil {
 			return
 		}
 		page.IsMarkdown = true
 		page.Checksum = utils.FileDataChecksum(page.Data)
-
-		/* replace markdown ext for the template ext */
-		urlpath := path[len(sitedir):]
-		page.URLPath = urlpath[:len(urlpath)-len(markdownext)] + templateext
+		page.URLPath = getUrlPath(path)
 
 		/* parse each file's attributes */
 		if config.Verbose {
@@ -122,7 +119,7 @@ func ProcessSiteFile(path string) (page models.SiteFile, err error) {
 
 func GetFrontMatter(buf []byte) []byte {
 	delim := []byte("---")
-	if !utils.CompareSlices(buf[0:3], delim) {
+	if bytes.Compare(buf[0:3], delim) != 0 {
 		return []byte{}
 	}
 
@@ -133,7 +130,7 @@ func GetFrontMatter(buf []byte) []byte {
 		if (len(buf) - n) <= 3 {
 			break
 		}
-		if utils.CompareSlices(buf[n:n+3], delim) {
+		if bytes.Compare(buf[n:n+3], delim) == 0 {
 			return buf[3 : n-1]
 		}
 	}
@@ -169,4 +166,14 @@ func RemoveSiteFile(s models.SiteFile) {
 
 func GetSiteFilePath(f models.SiteFile) string {
 	return f.FileDir + "/" + f.FileName
+}
+
+func isMarkdown(filename string) bool {
+	return filename[len(filename)-len(markdownext):] == markdownext
+}
+
+// Replace markdown ext for the template ext
+func getUrlPath(filename string) string {
+	urlpath := filename[len(sitedir):]
+	return urlpath[:len(urlpath)-len(markdownext)] + templateext
 }
