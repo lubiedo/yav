@@ -48,6 +48,9 @@ func init() {
 	flag.StringVar(&config.TplVars, "tpl-vars", "", "Load template variables.")
 
 	flag.Parse()
+
+	config.WriteTimeOut = 10
+	config.IdleTimeOut = 20
 }
 
 func main() {

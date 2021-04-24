@@ -27,3 +27,12 @@ type SiteTemplate struct {
 	FileDir  string
 	Tpl      *template.Template
 }
+
+func (sites Sites) FindSiteByUrl(path string) (SiteFile, bool) {
+	for _, f := range sites {
+		if path == f.URLPath {
+			return f, true
+		}
+	}
+	return SiteFile{}, false
+}
