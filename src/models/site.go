@@ -2,6 +2,8 @@ package models
 
 import "html/template"
 
+type Sites []SiteFile
+
 type SiteFile struct {
 	FileName   string
 	FileDir    string
