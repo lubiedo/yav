@@ -22,7 +22,7 @@ func Render(w http.ResponseWriter, req *http.Request) {
 	)
 
 	config.Log.Access(req)
-	file, found := ReturnSiteFile(req.URL.Path)
+	file, found := files.FindSiteByUrl(req.URL.Path)
 
 	if !found {
 		/*
@@ -42,7 +42,7 @@ func Render(w http.ResponseWriter, req *http.Request) {
 					newlocation += "/"
 				}
 				newlocation += "index" + templateext
-				file, _ = ReturnSiteFile(newlocation)
+				file, _ = files.FindSiteByUrl(newlocation)
 			} else {
 				http.ServeFile(w, req, urlpath)
 				return
@@ -124,8 +124,8 @@ func Serve() {
 	server := &http.Server{
 		Addr:         fulladdr,
 		Handler:      mux,
-		WriteTimeout: 10 * time.Second,
-		IdleTimeout:  20 * time.Second,
+		WriteTimeout: time.Duration(config.WriteTimeOut) * time.Second,
+		IdleTimeout:  time.Duration(config.IdleTimeOut) * time.Second,
 	}
 	if !config.UseHTTPS {
 		err := server.Serve(listener)
@@ -143,16 +143,6 @@ func Serve() {
 			config.Log.Fatal("%s", err)
 		}
 	}
-}
-
-// Finds the SiteFile struct depending on file URL path
-func ReturnSiteFile(path string) (models.SiteFile, bool) {
-	for _, f := range files {
-		if path == f.URLPath {
-			return f, true
-		}
-	}
-	return models.SiteFile{}, false
 }
 
 // 404 not found HTTP response

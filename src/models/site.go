@@ -2,6 +2,8 @@ package models
 
 import "html/template"
 
+type Sites []SiteFile
+
 type SiteFile struct {
 	FileName   string
 	FileDir    string
@@ -24,4 +26,13 @@ type SiteTemplate struct {
 	FileName string
 	FileDir  string
 	Tpl      *template.Template
+}
+
+func (sites Sites) FindSiteByUrl(path string) (SiteFile, bool) {
+	for _, f := range sites {
+		if path == f.URLPath {
+			return f, true
+		}
+	}
+	return SiteFile{}, false
 }
