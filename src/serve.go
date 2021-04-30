@@ -61,17 +61,17 @@ func Render(w http.ResponseWriter, req *http.Request) {
 				return
 			}
 
-			file = newfile
+			file = &newfile
 		} else {
 			NotFound(w, req)
 			return
 		}
 	} else {
 		/* it exists in filesystem? */
-		path := GetSiteFilePath(file)
+		path := GetSiteFilePath(*file)
 
 		if !utils.FileExist(path) {
-			RemoveSiteFile(file)
+			RemoveSiteFile(*file)
 			NotFound(w, req)
 			return
 		}
@@ -84,7 +84,7 @@ func Render(w http.ResponseWriter, req *http.Request) {
 		headers.AddToHttp(&H)
 	}
 
-	filepath := GetSiteFilePath(file)
+	filepath := GetSiteFilePath(*file)
 
 	if !file.IsMarkdown {
 		http.ServeFile(w, req, filepath)
@@ -95,7 +95,7 @@ func Render(w http.ResponseWriter, req *http.Request) {
 		config.Log.Info("File changed! Updating content of \"%s\" in cache",
 			filepath)
 
-		newfile, err = UpdateSiteFile(file)
+		newfile, err = UpdateSiteFile(*file)
 		if err != nil {
 			config.Log.Error("Error updating content of \"%s\" in cache",
 				filepath)
@@ -103,10 +103,10 @@ func Render(w http.ResponseWriter, req *http.Request) {
 			return
 		}
 
-		file = newfile
+		file = &newfile
 	}
 
-	tplvariables := GenerateTemplateVars(req, file)
+	tplvariables := GenerateTemplateVars(req, *file)
 	tpls.ExecuteTemplate(w, file.Attrs.Template, tplvariables)
 }
 
