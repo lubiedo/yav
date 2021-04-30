@@ -51,7 +51,6 @@ func InitMarkdown() (p Sites) {
 			config.Log.Info("Adding file: %s/%s", page.FileDir, page.FileName)
 		}
 		p.AddSite(&page)
-		// p = append(p, page)
 		return nil
 	})
 	if err != nil {
@@ -86,7 +85,7 @@ func ProcessSiteFile(path string) (page models.SiteFile, err error) {
 
 		fm := GetFrontMatter(page.Data)
 		if len(fm) == 0 {
-			err = fmt.Errorf("Invalid or not found front matter (%s/%s)",
+			err = fmt.Errorf("invalid or not found front matter (%s/%s)",
 				page.FileDir, page.FileName)
 			return
 		}
@@ -99,7 +98,7 @@ func ProcessSiteFile(path string) (page models.SiteFile, err error) {
 			return
 		}
 		if page.Attrs.Template == "" {
-			err = fmt.Errorf("Template missing for %s/%s", page.FileDir, page.FileName)
+			err = fmt.Errorf("template missing for %s/%s", page.FileDir, page.FileName)
 		}
 
 		mdextensions := parser.CommonExtensions | parser.Includes | parser.LaxHTMLBlocks
@@ -122,7 +121,7 @@ func ProcessSiteFile(path string) (page models.SiteFile, err error) {
 
 func GetFrontMatter(buf []byte) []byte {
 	delim := []byte("---")
-	if bytes.Compare(buf[0:3], delim) != 0 {
+	if !bytes.Equal(buf[0:3], delim) {
 		return []byte{}
 	}
 
@@ -133,7 +132,7 @@ func GetFrontMatter(buf []byte) []byte {
 		if (len(buf) - n) <= 3 {
 			break
 		}
-		if bytes.Compare(buf[n:n+3], delim) == 0 {
+		if bytes.Equal(buf[n:n+3], delim) {
 			return buf[3 : n-1]
 		}
 	}
