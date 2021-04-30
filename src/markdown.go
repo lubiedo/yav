@@ -23,10 +23,12 @@ const (
 
 var renderer *html.Renderer
 
-func InitMarkdown() (p models.Sites) {
+func InitMarkdown() (p Sites) {
 	if !utils.FileExist(sitedir) {
 		config.Log.Fatal("Directory \"%s\" does not exist", sitedir)
 	}
+
+	p = make(Sites)
 
 	/* render for HTML */
 	renderer = html.NewRenderer(html.RendererOptions{
@@ -48,7 +50,8 @@ func InitMarkdown() (p models.Sites) {
 		if config.Verbose {
 			config.Log.Info("Adding file: %s/%s", page.FileDir, page.FileName)
 		}
-		p = append(p, page)
+		p.AddSite(&page)
+		// p = append(p, page)
 		return nil
 	})
 	if err != nil {
@@ -138,30 +141,13 @@ func GetFrontMatter(buf []byte) []byte {
 }
 
 func UpdateSiteFile(oldf models.SiteFile) (newfile models.SiteFile, e error) {
-	for n, f := range files {
-		if f.Checksum != oldf.Checksum {
-			continue
-		}
-
-		newfile, e = ProcessSiteFile(GetSiteFilePath(f))
-		if e != nil {
-			break
-		}
-		files[n] = newfile
-		break
-	}
+	newfile, e = ProcessSiteFile(GetSiteFilePath(oldf))
+	files.UpdateSite(&newfile)
 	return
 }
 
 func RemoveSiteFile(s models.SiteFile) {
-	newfiles := make([]models.SiteFile, len(files))
-	for n, f := range files {
-		if (GetSiteFilePath(f) == GetSiteFilePath(s)) && (f.Checksum == s.Checksum) {
-			continue
-		}
-		newfiles[n] = f
-	}
-	files = newfiles
+	files.RemoveSite(&s)
 }
 
 func GetSiteFilePath(f models.SiteFile) string {
