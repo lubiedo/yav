@@ -25,7 +25,7 @@ const (
 
 var (
 	config  models.Config
-	files   []models.SiteFile
+	files   Sites
 	headers models.Headers
 	tpls    *template.Template
 	tplvars map[string]interface{}
@@ -48,6 +48,9 @@ func init() {
 	flag.StringVar(&config.TplVars, "tpl-vars", "", "Load template variables.")
 
 	flag.Parse()
+
+	config.WriteTimeOut = 10
+	config.IdleTimeOut = 20
 }
 
 func main() {

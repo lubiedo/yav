@@ -1,6 +1,8 @@
 package models
 
-import "html/template"
+import (
+	"html/template"
+)
 
 type SiteFile struct {
 	FileName   string
