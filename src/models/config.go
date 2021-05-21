@@ -15,4 +15,7 @@ type Config struct {
 	Log         *utils.Log
 	TplVars     string
 	TplErroPage string
+
+	WriteTimeOut int
+	IdleTimeOut  int
 }

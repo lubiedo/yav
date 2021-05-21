@@ -22,7 +22,7 @@ func Render(w http.ResponseWriter, req *http.Request) {
 	)
 
 	config.Log.Access(req)
-	file, found := ReturnSiteFile(req.URL.Path)
+	file, found := files.FindFileByUrl(req.URL.Path)
 
 	if !found {
 		/*
@@ -42,7 +42,7 @@ func Render(w http.ResponseWriter, req *http.Request) {
 					newlocation += "/"
 				}
 				newlocation += "index" + templateext
-				file, _ = ReturnSiteFile(newlocation)
+				file, _ = files.FindFileByUrl(newlocation)
 			} else {
 				http.ServeFile(w, req, urlpath)
 				return
@@ -61,17 +61,17 @@ func Render(w http.ResponseWriter, req *http.Request) {
 				return
 			}
 
-			file = newfile
+			file = &newfile
 		} else {
 			NotFound(w, req)
 			return
 		}
 	} else {
 		/* it exists in filesystem? */
-		path := GetSiteFilePath(file)
+		path := GetSiteFilePath(*file)
 
 		if !utils.FileExist(path) {
-			RemoveSiteFile(file)
+			RemoveSiteFile(*file)
 			NotFound(w, req)
 			return
 		}
@@ -84,7 +84,7 @@ func Render(w http.ResponseWriter, req *http.Request) {
 		headers.AddToHttp(&H)
 	}
 
-	filepath := GetSiteFilePath(file)
+	filepath := GetSiteFilePath(*file)
 
 	if !file.IsMarkdown {
 		http.ServeFile(w, req, filepath)
@@ -95,7 +95,7 @@ func Render(w http.ResponseWriter, req *http.Request) {
 		config.Log.Info("File changed! Updating content of \"%s\" in cache",
 			filepath)
 
-		newfile, err = UpdateSiteFile(file)
+		newfile, err = UpdateSiteFile(*file)
 		if err != nil {
 			config.Log.Error("Error updating content of \"%s\" in cache",
 				filepath)
@@ -103,10 +103,10 @@ func Render(w http.ResponseWriter, req *http.Request) {
 			return
 		}
 
-		file = newfile
+		file = &newfile
 	}
 
-	tplvariables := GenerateTemplateVars(req, file)
+	tplvariables := GenerateTemplateVars(req, *file)
 	tpls.ExecuteTemplate(w, file.Attrs.Template, tplvariables)
 }
 
@@ -124,8 +124,8 @@ func Serve() {
 	server := &http.Server{
 		Addr:         fulladdr,
 		Handler:      mux,
-		WriteTimeout: 10 * time.Second,
-		IdleTimeout:  20 * time.Second,
+		WriteTimeout: time.Duration(config.WriteTimeOut) * time.Second,
+		IdleTimeout:  time.Duration(config.IdleTimeOut) * time.Second,
 	}
 	if !config.UseHTTPS {
 		err := server.Serve(listener)
@@ -143,16 +143,6 @@ func Serve() {
 			config.Log.Fatal("%s", err)
 		}
 	}
-}
-
-// Finds the SiteFile struct depending on file URL path
-func ReturnSiteFile(path string) (models.SiteFile, bool) {
-	for _, f := range files {
-		if path == f.URLPath {
-			return f, true
-		}
-	}
-	return models.SiteFile{}, false
 }
 
 // 404 not found HTTP response

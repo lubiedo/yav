@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"io/fs"
 	"os"
@@ -22,10 +23,12 @@ const (
 
 var renderer *html.Renderer
 
-func InitMarkdown() (p []models.SiteFile) {
+func InitMarkdown() (p models.SiteFiles) {
 	if !utils.FileExist(sitedir) {
 		config.Log.Fatal("Directory \"%s\" does not exist", sitedir)
 	}
+
+	p = make(models.SiteFiles)
 
 	/* render for HTML */
 	renderer = html.NewRenderer(html.RendererOptions{
@@ -47,7 +50,7 @@ func InitMarkdown() (p []models.SiteFile) {
 		if config.Verbose {
 			config.Log.Info("Adding file: %s/%s", page.FileDir, page.FileName)
 		}
-		p = append(p, page)
+		p.AddFile(&page)
 		return nil
 	})
 	if err != nil {
@@ -67,17 +70,13 @@ func ProcessSiteFile(path string) (page models.SiteFile, err error) {
 		},
 	}
 
-	if len(page.FileName) > len(markdownext) &&
-		page.FileName[len(page.FileName)-len(markdownext):] == markdownext {
+	if len(page.FileName) > len(markdownext) && isMarkdown(page.FileName) {
 		if page.Data, err = os.ReadFile(path); err != nil {
 			return
 		}
 		page.IsMarkdown = true
 		page.Checksum = utils.FileDataChecksum(page.Data)
-
-		/* replace markdown ext for the template ext */
-		urlpath := path[len(sitedir):]
-		page.URLPath = urlpath[:len(urlpath)-len(markdownext)] + templateext
+		page.URLPath = GetUrlPath(path)
 
 		/* parse each file's attributes */
 		if config.Verbose {
@@ -86,7 +85,7 @@ func ProcessSiteFile(path string) (page models.SiteFile, err error) {
 
 		fm := GetFrontMatter(page.Data)
 		if len(fm) == 0 {
-			err = fmt.Errorf("Invalid or not found front matter (%s/%s)",
+			err = fmt.Errorf("invalid or not found front matter (%s/%s)",
 				page.FileDir, page.FileName)
 			return
 		}
@@ -99,7 +98,7 @@ func ProcessSiteFile(path string) (page models.SiteFile, err error) {
 			return
 		}
 		if page.Attrs.Template == "" {
-			err = fmt.Errorf("Template missing for %s/%s", page.FileDir, page.FileName)
+			err = fmt.Errorf("template missing for %s/%s", page.FileDir, page.FileName)
 		}
 
 		mdextensions := parser.CommonExtensions | parser.Includes | parser.LaxHTMLBlocks
@@ -122,7 +121,7 @@ func ProcessSiteFile(path string) (page models.SiteFile, err error) {
 
 func GetFrontMatter(buf []byte) []byte {
 	delim := []byte("---")
-	if !utils.CompareSlices(buf[0:3], delim) {
+	if !bytes.Equal(buf[0:3], delim) {
 		return []byte{}
 	}
 
@@ -133,7 +132,7 @@ func GetFrontMatter(buf []byte) []byte {
 		if (len(buf) - n) <= 3 {
 			break
 		}
-		if utils.CompareSlices(buf[n:n+3], delim) {
+		if bytes.Equal(buf[n:n+3], delim) {
 			return buf[3 : n-1]
 		}
 	}
@@ -141,32 +140,23 @@ func GetFrontMatter(buf []byte) []byte {
 }
 
 func UpdateSiteFile(oldf models.SiteFile) (newfile models.SiteFile, e error) {
-	for n, f := range files {
-		if f.Checksum != oldf.Checksum {
-			continue
-		}
-
-		newfile, e = ProcessSiteFile(GetSiteFilePath(f))
-		if e != nil {
-			break
-		}
-		files[n] = newfile
-		break
-	}
+	newfile, e = ProcessSiteFile(GetSiteFilePath(oldf))
+	files.UpdateFile(&newfile)
 	return
 }
 
-func RemoveSiteFile(s models.SiteFile) {
-	newfiles := make([]models.SiteFile, len(files))
-	for n, f := range files {
-		if (GetSiteFilePath(f) == GetSiteFilePath(s)) && (f.Checksum == s.Checksum) {
-			continue
-		}
-		newfiles[n] = f
-	}
-	files = newfiles
-}
+func RemoveSiteFile(s models.SiteFile) { files.RemoveFile(&s) }
 
 func GetSiteFilePath(f models.SiteFile) string {
 	return f.FileDir + "/" + f.FileName
+}
+
+func IsMarkdown(filename string) bool {
+	return filename[len(filename)-len(markdownext):] == markdownext
+}
+
+// Replace markdown ext for the template ext
+func GetUrlPath(filename string) string {
+	urlpath := filename[len(sitedir):]
+	return urlpath[:len(urlpath)-len(markdownext)] + templateext
 }
