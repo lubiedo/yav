@@ -70,7 +70,7 @@ func ProcessSiteFile(path string) (page models.SiteFile, err error) {
 		},
 	}
 
-	if len(page.FileName) > len(markdownext) && isMarkdown(page.FileName) {
+	if len(page.FileName) > len(markdownext) && IsMarkdown(page.FileName) {
 		if page.Data, err = os.ReadFile(path); err != nil {
 			return
 		}
