@@ -151,7 +151,7 @@ func GetSiteFilePath(f models.SiteFile) string {
 	return f.FileDir + "/" + f.FileName
 }
 
-func isMarkdown(filename string) bool {
+func IsMarkdown(filename string) bool {
 	return filename[len(filename)-len(markdownext):] == markdownext
 }
 
