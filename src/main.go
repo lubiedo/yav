@@ -25,7 +25,7 @@ const (
 
 var (
 	config  models.Config
-	files   Sites
+	files   models.SiteFiles
 	headers models.Headers
 	tpls    *template.Template
 	tplvars map[string]interface{}

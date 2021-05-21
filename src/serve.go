@@ -22,7 +22,7 @@ func Render(w http.ResponseWriter, req *http.Request) {
 	)
 
 	config.Log.Access(req)
-	file, found := files.FindSiteByUrl(req.URL.Path)
+	file, found := files.FindFileByUrl(req.URL.Path)
 
 	if !found {
 		/*
@@ -42,7 +42,7 @@ func Render(w http.ResponseWriter, req *http.Request) {
 					newlocation += "/"
 				}
 				newlocation += "index" + templateext
-				file, _ = files.FindSiteByUrl(newlocation)
+				file, _ = files.FindFileByUrl(newlocation)
 			} else {
 				http.ServeFile(w, req, urlpath)
 				return

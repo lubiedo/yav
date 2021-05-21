@@ -27,3 +27,14 @@ type SiteTemplate struct {
 	FileDir  string
 	Tpl      *template.Template
 }
+
+type SiteFiles map[string]*SiteFile
+
+func (sf SiteFiles) AddFile(s *SiteFile)    { sf[s.URLPath] = s }
+func (sf SiteFiles) UpdateFile(s *SiteFile) { sf[s.URLPath] = s }
+func (sf SiteFiles) RemoveFile(s *SiteFile) { delete(sf, s.URLPath) }
+
+func (sf SiteFiles) FindFileByUrl(path string) (*SiteFile, bool) {
+	s, ok := sf[path]
+	return s, ok
+}

@@ -23,12 +23,12 @@ const (
 
 var renderer *html.Renderer
 
-func InitMarkdown() (p Sites) {
+func InitMarkdown() (p models.SiteFiles) {
 	if !utils.FileExist(sitedir) {
 		config.Log.Fatal("Directory \"%s\" does not exist", sitedir)
 	}
 
-	p = make(Sites)
+	p = make(models.SiteFiles)
 
 	/* render for HTML */
 	renderer = html.NewRenderer(html.RendererOptions{
@@ -50,7 +50,7 @@ func InitMarkdown() (p Sites) {
 		if config.Verbose {
 			config.Log.Info("Adding file: %s/%s", page.FileDir, page.FileName)
 		}
-		p.AddSite(&page)
+		p.AddFile(&page)
 		return nil
 	})
 	if err != nil {
@@ -76,7 +76,7 @@ func ProcessSiteFile(path string) (page models.SiteFile, err error) {
 		}
 		page.IsMarkdown = true
 		page.Checksum = utils.FileDataChecksum(page.Data)
-		page.URLPath = getUrlPath(path)
+		page.URLPath = GetUrlPath(path)
 
 		/* parse each file's attributes */
 		if config.Verbose {
@@ -141,13 +141,11 @@ func GetFrontMatter(buf []byte) []byte {
 
 func UpdateSiteFile(oldf models.SiteFile) (newfile models.SiteFile, e error) {
 	newfile, e = ProcessSiteFile(GetSiteFilePath(oldf))
-	files.UpdateSite(&newfile)
+	files.UpdateFile(&newfile)
 	return
 }
 
-func RemoveSiteFile(s models.SiteFile) {
-	files.RemoveSite(&s)
-}
+func RemoveSiteFile(s models.SiteFile) { files.RemoveFile(&s) }
 
 func GetSiteFilePath(f models.SiteFile) string {
 	return f.FileDir + "/" + f.FileName
@@ -158,7 +156,7 @@ func isMarkdown(filename string) bool {
 }
 
 // Replace markdown ext for the template ext
-func getUrlPath(filename string) string {
+func GetUrlPath(filename string) string {
 	urlpath := filename[len(sitedir):]
 	return urlpath[:len(urlpath)-len(markdownext)] + templateext
 }
