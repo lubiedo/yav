@@ -119,6 +119,10 @@ func Serve() {
 	listener, err := net.Listen("tcp", fulladdr)
 	if err != nil {
 		config.Log.Fatal("%s", err)
+	} else {
+		if config.Verbose {
+			config.Log.Info("Listening on %s", fulladdr)
+		}
 	}
 
 	server := &http.Server{
