@@ -9,26 +9,27 @@ import (
 
 	"github.com/lubiedo/yav/src/models"
 	"github.com/lubiedo/yav/src/utils"
-	"gopkg.in/yaml.v2"
 )
 
 /* defaults */
 const (
-	verbosity = false
-	usehttps  = true
-	port      = "8080"
-	addr      = "localhost"
+	verbosity    = false
+	usehttps     = true
+	port         = "8080"
+	addr         = "localhost"
+	writetimeout = 10
+	idletimeout  = 20
 
 	name    = "Y∆V"
 	version = "0.1.0"
 )
 
 var (
-	config  models.Config
-	files   models.SiteFiles
-	headers models.Headers
-	tpls    *template.Template
-	tplvars map[string]interface{}
+	confpath string
+	config   models.Config
+	files    models.SiteFiles
+	headers  models.Headers
+	tpls     *template.Template
 )
 
 func init() {
@@ -45,17 +46,23 @@ func init() {
 
 	flag.StringVar(&config.LogFile, "log", "", "Output to log file.")
 	flag.StringVar(&config.TplErroPage, "tpl-error", "", "Use template as error page (filename).")
-	flag.StringVar(&config.TplVars, "tpl-vars", "", "Load template variables.")
+	flag.StringVar(&confpath, "config", "", "Load configuration from YAML file.")
 
 	flag.Parse()
 
-	config.WriteTimeOut = 10
-	config.IdleTimeOut = 20
+	config.WriteTimeOut = writetimeout
+	config.IdleTimeOut = idletimeout
+
+	config.Log = utils.NewLog(os.Stderr)
 }
 
 func main() {
+	/* load config */
+	if confpath != "" {
+		config.LoadConfig(confpath)
+	}
+
 	/* logging */
-	config.Log = utils.NewLog(os.Stderr)
 	if config.LogFile != "" {
 		fd, err := os.OpenFile(config.LogFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY,
 			0644)
@@ -72,20 +79,6 @@ func main() {
 	if config.UseHTTPS {
 		if !utils.FileExist(config.CertPath) || !utils.FileExist(config.KeyPath) {
 			config.Log.Fatal("Can't load certificate or key files")
-		}
-	}
-
-	if config.TplVars != "" {
-		data, err := os.ReadFile(config.TplVars)
-		if err != nil {
-			config.Log.Fatal("Error loading template variables from \"%s\"",
-				config.TplVars)
-		}
-
-		err = yaml.Unmarshal(data, &tplvars)
-		if err != nil {
-			config.Log.Fatal("Parsing template variables from \"%s\" failed",
-				config.TplVars)
 		}
 	}
 
