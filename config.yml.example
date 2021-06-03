@@ -1,0 +1,7 @@
+addr: localhost
+port: 8081
+log-file: output.log
+verbose: true
+use-https: false
+vars:
+  thing: "this is a string"

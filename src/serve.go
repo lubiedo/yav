@@ -191,8 +191,8 @@ func GenerateTemplateVars(r *http.Request, f models.SiteFile) (vars map[string]i
 	vars["query"] = r.URL.Query()
 	vars["template"] = f.Attrs.Template
 	vars["content"] = template.HTML(string(f.Rendered))
-	if len(tplvars) > 0 {
-		for k, v := range tplvars {
+	if len(config.TplVars) > 0 {
+		for k, v := range config.TplVars {
 			vars[k] = v
 		}
 	}

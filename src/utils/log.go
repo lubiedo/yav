@@ -10,7 +10,7 @@ import (
 	"net/http"
 )
 
-const prefix = "Y∆V "
+var prefix string = fmt.Sprintf("(%d) Y∆V ", os.Getpid())
 
 type Log struct {
 	Logger *log.Logger
@@ -18,11 +18,8 @@ type Log struct {
 }
 
 func NewLog(out io.Writer) *Log {
-	p := os.Getpid()
-
 	return &Log{
-		Logger: log.New(out, fmt.Sprintf("(%d) %s", p, prefix),
-			log.Ldate|log.Lmicroseconds),
+		Logger: log.New(out, prefix, log.Ldate|log.Lmicroseconds),
 	}
 }
 
