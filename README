@@ -2,7 +2,7 @@ Y∆V
 ===
 yav is a Golang "live" static blog. Content is kept in memory for fast delivery
 and checked against disk to grab updates to the site. It was aimed to be for
-personal use but open for all.
+personal use but decided to open source it for all.
 
 Template functionality is provided by Go's html/template and sprig. Check out
 the documentation of both packages:
@@ -11,6 +11,9 @@ the documentation of both packages:
 
 By default it will try to use HTTPS so a certificate and key should be supplied.
 Plain HTTP is also available by disabling HTTPS via "-use-https=false".
+
+You can specify all configuration settings in a YAML file as seen in the file
+"config.yml.example" and using the `-config` flag.
 
 Use "-help" for all the program flags.
 
@@ -67,7 +70,7 @@ Fixed variables are:
   * `template` (string): template name.
   * `content` (string): HTML rendered content from markdown.
 
-It is possible to add more variables to be used by templates via `-tpl-vars` and
+It is possible to add more variables to be used by templates via `-config` and
 a yaml file.
 
 Reloading templates
