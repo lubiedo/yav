@@ -24,7 +24,7 @@ func NewLog(out io.Writer) *Log {
 }
 
 func (L *Log) Fatal(s string, args ...interface{}) { L.Logger.Fatalf("[FATAL] "+s, args...) }
-func (L *Log) Panic(s string, args ...interface{}) { L.Logger.Panicf("[FATAL] "+s, args...) }
+func (L *Log) Panic(s string, args ...interface{}) { L.Logger.Panicf("[PANIC] "+s, args...) }
 func (L *Log) Error(s string, args ...interface{}) {
 	L.Logger.Printf("[ERROR] "+s, args...)
 	debug.PrintStack()
