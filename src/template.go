@@ -25,6 +25,7 @@ var extrafmap = map[string]interface{}{
 	"toTplExt":   TplFuncToTplExt,
 	"fromTplExt": TplFuncFromTplExt,
 	"getFM":      TplFuncGetFM,
+	"getSiteMap": TplFuncGetSM,
 }
 
 func InitTemplate() (tpls *template.Template) {
@@ -111,4 +112,12 @@ func TplFuncGetFM(p string) (fm map[string]interface{}) {
 		errorTplFunc("getFM")
 	}
 	return
+}
+func TplFuncGetSM() string {
+	data, err := sitemap.ToJSON()
+	if err != nil {
+		config.Log.Error("Error executing template function \"%s\" (%s)", name, err)
+		return ""
+	}
+	return string(data)
 }

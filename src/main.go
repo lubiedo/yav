@@ -28,6 +28,7 @@ var (
 	confpath string
 	config   models.Config
 	files    models.SiteFiles
+	sitemap  models.SiteMap
 	headers  models.Headers
 	tpls     *template.Template
 )
@@ -105,6 +106,11 @@ func main() {
 			}
 		}
 	}()
+
+	sitemap = files.GenerateSiteMap()
+	if config.Verbose {
+		config.Log.Info("Sitemap generated.")
+	}
 
 	Serve()
 }

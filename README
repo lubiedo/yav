@@ -90,6 +90,7 @@ Some extra functions were added to yav besides the mentioned previously.
   string.
   * `getFM (string)`: get front matter variables from template. Returns:
   map[string]interface{}.
+  * `getSiteMap ()`: get sitemap in JSON format. Returns: string
 
 Requirements
 ============
