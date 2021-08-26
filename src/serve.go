@@ -23,6 +23,7 @@ func Render(w http.ResponseWriter, req *http.Request) {
 
 	config.Log.Access(req)
 	file, found := files.FindFileByUrl(req.URL.Path)
+	query := req.URL.Query()
 
 	if !found {
 		/*
@@ -77,17 +78,34 @@ func Render(w http.ResponseWriter, req *http.Request) {
 		}
 	}
 
-	/* default http headers... */
+	filepath := GetSiteFilePath(*file)
+	raw_serve := false
 	H := w.Header()
-	H.Set("Content-Type", file.MimeType)
+
+	/* serve markdown file without FM if ?_raw query param is present */
+	if len(query) > 0 {
+		if _, ok := query["_raw"]; ok {
+			raw_serve = true
+		}
+	}
+
+	if raw_serve {
+		H.Set("Content-Type", utils.FileMimeType(".txt"))
+	} else {
+		H.Set("Content-Type", file.MimeType)
+	}
 	if len(headers) > 0 { /* ... and extra headers */
 		headers.AddToHttp(&H)
 	}
 
-	filepath := GetSiteFilePath(*file)
-
 	if !file.IsMarkdown {
 		http.ServeFile(w, req, filepath)
+		return
+	}
+
+	if raw_serve {
+		fm := GetFrontMatter(file.Data)
+		w.Write(file.Data[len(fm)+8:]) // skip delims
 		return
 	}
 
